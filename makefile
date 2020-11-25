@@ -4,7 +4,7 @@ all: dfs bfs topo display
 clean:
 	rm -f dfs bfs topo display cpath
 
-cpath: demo.cpp Graph.h
+cpath: demo.cpp Graph.h CPath.h
 	g++ -std=c++11 cpath.cpp -o cpath
 
 demo2: demo.cpp Graph.h

@@ -88,6 +88,9 @@
 		<Unit filename="/Users/mariyapasheva/Projects/CostConstrainedShortestPath/Graph.h">
 			<Option target="CostConstrainedShortestPath"/>
 		</Unit>
+		<Unit filename="/Users/mariyapasheva/Projects/CostConstrainedShortestPath/MinHeap.h">
+			<Option target="CostConstrainedShortestPath"/>
+		</Unit>
 		<Unit filename="/Users/mariyapasheva/Projects/CostConstrainedShortestPath/bfs.cpp">
 			<Option target="CostConstrainedShortestPath"/>
 		</Unit>
@@ -110,6 +113,12 @@
 			<Option target="CostConstrainedShortestPath"/>
 		</Unit>
 		<Unit filename="/Users/mariyapasheva/Projects/CostConstrainedShortestPath/g.h">
+			<Option target="CostConstrainedShortestPath"/>
+		</Unit>
+		<Unit filename="/Users/mariyapasheva/Projects/CostConstrainedShortestPath/minheap.cpp">
+			<Option target="CostConstrainedShortestPath"/>
+		</Unit>
+		<Unit filename="/Users/mariyapasheva/Projects/CostConstrainedShortestPath/minheap.h">
 			<Option target="CostConstrainedShortestPath"/>
 		</Unit>
 		<Unit filename="/Users/mariyapasheva/Projects/CostConstrainedShortestPath/topo.cpp">

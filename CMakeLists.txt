@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 include_directories(.)
 
 add_executable(CostConstrainedShortestPath
+        MinHeap.h
         bfs.cpp
         cpath.cpp
         CPath.h
@@ -15,4 +16,6 @@ add_executable(CostConstrainedShortestPath
         display.cpp
         g.h
         Graph.h
-        topo.cpp)
+        topo.cpp
+        minheap.cpp
+        )
