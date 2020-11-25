@@ -6,7 +6,7 @@
 int main(){
   graph g;
 
-  g._add_edge("a b 2");
+  g._add_edge("a b 2 5");
   g._add_edge("a c 2");
   g._add_edge("a d ");
   g._add_edge("b d ten");

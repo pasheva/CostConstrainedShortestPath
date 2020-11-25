@@ -2,7 +2,16 @@
 all: dfs bfs topo display
 
 clean:
-	rm -f dfs bfs topo display
+	rm -f dfs bfs topo display cpath
+
+cpath: demo.cpp Graph.h
+	g++ -std=c++11 cpath.cpp -o cpath
+
+demo2: demo.cpp Graph.h
+	g++ -std=c++11 demo2.cpp -o demo2
+
+demo: demo.cpp Graph.h
+	g++ -std=c++11 demo.cpp -o demo
 
 display: display.cpp Graph.h
 	g++ -std=c++11 display.cpp -o display

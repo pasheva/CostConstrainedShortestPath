@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <sstream>
 #include <fstream>
+#include <utility>
 
 using std::string;
 using std::vector;
@@ -16,6 +17,9 @@ using std::unordered_set;
 #define DISCOVERED   'd'
 #define ACTIVE       'a'
 #define FINISHED     'f'
+
+
+using namespace std;
 
 /*
  * function:  pvec
@@ -443,6 +447,22 @@ class graph {
           p_edge(e);
         std::cout << "\n";
       }
+    }
+
+    unordered_map<string,
+        unordered_map<string,
+            pair<double,double>>>layoutGraph(){
+        int u;
+        unordered_map<string,
+                unordered_map<string,
+                        pair<double,double>>> ans;
+
+        for(u=0; u<vertices.size(); u++) {
+            for(edge &e : vertices[u].outgoing)
+                ans[vertices[u].name][id2name(e.vertex_id)] = make_pair(e.weight, e.weight2);
+        }
+
+        return ans;
     }
 
     /*
