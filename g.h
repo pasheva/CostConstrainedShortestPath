@@ -7,10 +7,12 @@
 #include <sstream>
 #include <fstream>
 
+
 using std::string;
 using std::vector;
 using std::unordered_map;
 using std::unordered_set;
+using namespace std;
 
 #define UNDISCOVERED 'u'
 #define DISCOVERED   'd'
@@ -443,6 +445,22 @@ class graph {
           p_edge(e);
         std::cout << "\n";
       }
+    }
+
+    unordered_map<string,
+            unordered_map<string,
+                    pair<double,double>>>layoutGraph(){
+        int u;
+        unordered_map<string,
+                unordered_map<string,
+        pair<double,double>>> ans;
+
+        for(u=0; u<vertices.size(); u++) {
+            for(edge &e : vertices[u].outgoing)
+                ans[vertices[u].name][id2name(e.vertex_id)] = make_pair(e.weight, e.weight2);
+        }
+
+        return ans;
     }
 
     /*

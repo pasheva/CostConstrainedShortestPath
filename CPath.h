@@ -41,7 +41,7 @@ public:
     bool operator() (Signature const& p1, Signature const &p2);
     void check();
     void checkPQ(priority_queue<Signature, vector<Signature>, CPath<CostT,TimeT,VertexT>> pq);
-    void feasiblePath();
+    void feasiblePath(VertexT start, VertexT dest);
     void test();
     void checkP();
 };
@@ -129,7 +129,7 @@ void CPath<CostT, TimeT, VertexT>::findPaths(VertexT sourceV) {
 
     checkP();
     cout << endl;
-    feasiblePath();
+    feasiblePath("0","6");
 
 }
 
@@ -300,23 +300,69 @@ void CPath<CostT, TimeT, VertexT>::checkP() {
     }
 }
 
-template<typename CostT, typename TimeT, typename VertexT>
-void CPath<CostT, TimeT, VertexT>::feasiblePath() {
+//template<typename CostT, typename TimeT, typename VertexT>
+//void CPath<CostT, TimeT, VertexT>::feasiblePath() {
+//
+//    // TODO: CHECK FOR FOR COST AND TIME BASED ON THE ORIGINAL EDGE (SUBSTRACTION)
+//
+//
+//    auto pathsForV = P.find("6");
+//    vector<Signature> t = pathsForV->second;
+//    VertexT currV = "6";
+//    cout << currV << " ";
+//
+//    while( currV != "0" ){
+//        currV = t.back().pred;
+//        cout << currV << " ";
+//        pathsForV = P.find(currV);
+//        t = pathsForV->second;
+//    }
+//}
+
+
+template <typename CostT, typename TimeT, typename VertexT>
+void CPath<CostT, TimeT, VertexT>::feasiblePath(VertexT start, VertexT dest) {
 
     // TODO: CHECK FOR FOR COST AND TIME BASED ON THE ORIGINAL EDGE (SUBSTRACTION)
 
-    auto pathsForV = P.find("6");
+    // auto pathsForV = P.find("6");
+    auto pathsForV = P.find(dest);
     vector<Signature> t = pathsForV->second;
     VertexT currV = "6";
+    Signature sig = t.back();
+    CostT currCost = sig.cost;
+    TimeT currTime = sig.time;
+
+    CostT orgCost;
+    TimeT orgTime;
+    VertexT pred;
     cout << currV << " ";
 
-    while( currV != "0" ){
-        currV = t.back().pred;
-        cout << currV << " ";
-        pathsForV = P.find(currV);
+    // while (currV != start){
+    while (currV != start ) {
+        pred = sig.pred;
+
+        auto i = layout.find(pred);
+        if (i != layout.end()) {
+            auto b = i->second.find(currV);
+            if (b != i->second.end()) {
+                orgCost = b->second.first;
+                orgTime = b->second.second;
+            }
+        }
+
+        pathsForV = P.find(pred);
         t = pathsForV->second;
+        for (const auto &n : t) {
+            if (((currCost - orgCost) == n.cost) && (currTime - orgTime == n.time)) {
+                sig = n;
+                currCost = n.cost;
+                currTime = n.time;
+                currV = n.vertex;
+                cout << currV << " ";
+            }
+        }
     }
 }
-
 
 #endif

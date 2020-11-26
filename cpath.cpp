@@ -15,6 +15,7 @@ int main(int argc, char *argv[]){
 
     cout << "\nF*** THAT SHIT ASS NEIGHBOURS:\n\n";
     myPath.findPaths("0");
+    cout << endl;
     myPath.check();
     return 0;
 }
