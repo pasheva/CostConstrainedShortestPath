@@ -1,16 +1,36 @@
+Name | NetID | UIN
+J Jesus Benitez-Gorostieta | jbenit5 | 661143747
+Mariya Stefanova Pasheva | mpashe2  | 679604082
 
-This folder contains the following:
+1. Compiling the program:
+make clean
+make cpath
+2. Running the program:
+./cpath <file> <s> <d> <budget>
 
-  A C++ directed graph class in file Graph.h.  The class
-    uses an adjacency list data structure and allows
-    two edge weights.  It also includes member functions
-    which implement various fundamental graph algorithms.
+SAMPLE RUN AND OUTPUT:
 
-  Several driver programs which read graphs and apply
-    particular algorithms.  See, for example dfs.cpp
+❯ ./cpath g1.g 0 6 100
+PARETO TRADEOFF CURVE | NON-DOMINATED PATHS
+-------------------------------------------
+(Cost,Time)
+(7  ,  9)
+(10  ,  6)
+(11  ,  5)
 
-  Several input files encoding graphs in a simple but
-    flexible format.  Sample graph files have a .g 
-    extension.
+COST-FEASIBLE AND FASTEST PAIR(COST, TIME):
+------------------------------------------
+(11 , 5)
 
-  A makefile which compiles the various executables.
+ACTUAL PATH:
+------------------------
+0 4 5 6
+
+❯ ./cpath g1.g 6 0 100
+PARETO TRADEOFF CURVE | NON-DOMINATED PATHS
+-------------------------------------------
+PATH NOT FEASIBLE!
+
+COST-FEASIBLE AND FASTEST PAIR(COST, TIME):
+------------------------------------------
+PATH NOT FEASIBLE!

@@ -5,8 +5,8 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <stack>
 #include "Graph.h"
-
 
 using namespace std;
 
@@ -29,7 +29,6 @@ private:
     CostT budget;
     graph G;
 
-    //Hash of Vectors
     unordered_map<VertexT, vector<Signature>> P;
     unordered_map<string, unordered_map<string, pair<double,double>>> layout;
 
@@ -37,20 +36,37 @@ private:
 public:
     CPath();
     CPath<CostT, TimeT, VertexT>(graph& G, CostT& budget);
-    void findPaths(VertexT sourceV);
     bool operator() (Signature const& p1, Signature const &p2);
-    void check();
-    void checkPQ(priority_queue<Signature, vector<Signature>, CPath<CostT,TimeT,VertexT>> pq);
+    void findPaths(VertexT sourceV);
     void feasiblePath(VertexT start, VertexT dest);
-    void test();
-    void checkP();
+    void checkP(VertexT dest);
 };
 
 
 
+/**
+ * Default constructor needed for the operator overloading.
+ * @tparam CostT
+ * @tparam TimeT
+ * @tparam VertexT
+ */
 template<typename CostT, typename TimeT, typename VertexT>
 CPath<CostT, TimeT, VertexT>::CPath() {}
 
+/**
+ *
+ * Constructor used to create the object with
+ * which are working in the cpath.cpp file.
+ *
+ * A function to layoutGraph() has been added to Graph.h class.
+ * This function is helping us store the graph as hastable of vertecies and signatures.
+ *
+ * @tparam CostT
+ * @tparam TimeT
+ * @tparam VertexT
+ * @param G Passing already created graph.
+ * @param budget Amount based on user input.
+ */
 template<typename CostT, typename TimeT, typename VertexT>
 CPath<CostT, TimeT, VertexT>::CPath(graph& G, CostT& budget) {
     this->budget = budget;
@@ -58,6 +74,19 @@ CPath<CostT, TimeT, VertexT>::CPath(graph& G, CostT& budget) {
     this->layout = G.layoutGraph();
 }
 
+/**
+ *
+ * Overloading the () operator in order to use it for the
+ * min-heap priority queue.
+ * Order of comparisons: 1. Cost 2. Time 3. Vertex
+ *
+ * @tparam CostT
+ * @tparam TimeT
+ * @tparam VertexT
+ * @param p1
+ * @param p2
+ * @return
+ */
 template<typename CostT, typename TimeT, typename VertexT>
 bool CPath<CostT, TimeT, VertexT>::operator()(const CPath::Signature &p1, const CPath::Signature &p2) {
     {
@@ -79,6 +108,19 @@ bool CPath<CostT, TimeT, VertexT>::operator()(const CPath::Signature &p1, const 
     }
 }
 
+/**
+ *
+ * Finding the paths based on the algorithm
+ * and queueing them to P[Vertex] in the Pareto
+ * method. [cost -> increasing, time -> decreasing]
+ *
+ * We result in a complete non-dominated paths for each vertex.
+ *
+ * @tparam CostT
+ * @tparam TimeT
+ * @tparam VertexT
+ * @param sourceV Soruce vertex based on user input.
+ */
 template<typename CostT, typename TimeT, typename VertexT>
 void CPath<CostT, TimeT, VertexT>::findPaths(VertexT sourceV) {
 
@@ -86,6 +128,7 @@ void CPath<CostT, TimeT, VertexT>::findPaths(VertexT sourceV) {
     priority_queue<Signature, vector<Signature>, CPath<CostT,TimeT,VertexT>> pq;
 
     Signature t;
+    t.pred = {};
     t.cost = 0;
     t.time = 0;
     t.vertex = sourceV;
@@ -103,239 +146,105 @@ void CPath<CostT, TimeT, VertexT>::findPaths(VertexT sourceV) {
         pathsForV = P.find(currVertex);
 
         if(currCost > this->budget) { continue; }
-        else if(pathsForV->second.empty()){
-            pathsForV->second.push_back(currNode);
-
-        }
+        else if(pathsForV->second.empty()){ pathsForV->second.push_back(currNode); }
         else if (currTime >= pathsForV->second.back().time){ continue; }
-        else{
-            pathsForV->second.push_back(currNode);
-        }
+        else{ pathsForV->second.push_back(currNode); }
 
         //Populate
         auto temp = layout.find(currVertex);
         if(!(temp == layout.end())){
             for(auto &V2 : temp->second){
                 // Neighbour, Cost, Time
-                Signature temp2;
-                temp2.pred = currVertex;
-                temp2.vertex = V2.first;
-                temp2.cost = V2.second.first + currCost;
-                temp2.time = V2.second.second + currTime;
-                pq.emplace(temp2);
+                Signature tempSig;
+                tempSig.pred = currVertex;
+                tempSig.vertex = V2.first;
+                tempSig.cost = V2.second.first + currCost;
+                tempSig.time = V2.second.second + currTime;
+                pq.emplace(tempSig);
             }
         }
     }
-
-    checkP();
-    cout << endl;
-    feasiblePath("0","6");
-
-}
-
-template<typename CostT, typename TimeT, typename VertexT>
-void
-CPath<CostT, TimeT, VertexT>::checkPQ(priority_queue<Signature, vector<Signature>, CPath<CostT, TimeT, VertexT>> pq) {
-    while (!pq.empty())
-    {
-        auto t = pq.top();
-
-        pq.pop();
-
-        cout << " (Neighbour: "
-             << t.vertex
-             << " Cost "
-             << t.cost
-             << " Time "
-             << t.time << ") ";
-    }
-    cout << endl;
 }
 
 
+
+/**
+ *
+ * We are analyzing the P[] and outputing the
+ * non-dominated signatures of the destination vertex.
+ *
+ * @tparam CostT
+ * @tparam TimeT
+ * @tparam VertexT
+ * @param dest Based on user input.
+ */
 template<typename CostT, typename TimeT, typename VertexT>
-void CPath<CostT, TimeT, VertexT>::check() {
-    for(auto& V: this->layout){
-        // forVertex
-        cout << V.first << " : ";
-        for(auto &V2 : V.second){
-            // Neighbour Vertex , Cost , Time
-            cout << "(" << V2.first << "," << V2.second.first << "," << V2.second.second << ")";
+void CPath<CostT, TimeT, VertexT>::checkP(VertexT dest) {
+
+
+        cout << "PARETO TRADEOFF CURVE | NON-DOMINATED PATHS" << endl;
+        cout << "-------------------------------------------" << endl;
+
+        auto V = P.find(dest);
+        if(V == P.end()){
+            cout << "PATH NOT FEASIBLE!\n " << endl;
+            return;
+        }
+        cout << "(Cost,Time)" << endl;
+        for(auto &V2 : V->second){
+            cout << "(" << V2.cost << "  ,  " << V2.time << ")\n";
         }
         cout << endl;
-    }
+
 }
 
-template<typename CostT, typename TimeT, typename VertexT>
-void CPath<CostT, TimeT, VertexT>::test() {
 
-
-    vector<Signature> test;
-    Signature t;
-    t.cost = 0;
-    t.time = 0;
-    t.vertex = '0';
-    test.push_back(t);
-
-    // sig t;
-    t.cost = 2;
-    t.time = 4;
-    t.vertex = '1';
-    test.push_back(t);
-
-    // sig t;
-    t.cost = 4;
-    t.time = 2;
-    t.vertex = '4';
-    test.push_back(t);
-
-    // sig t;
-    t.cost = 4;
-    t.time = 5;
-    t.vertex = '0';
-    test.push_back(t);
-
-    // sig t;
-    t.cost = 5;
-    t.time = 6;
-    t.vertex = '2';
-    test.push_back(t);
-
-    // sig t;
-    t.cost = 6;
-    t.time = 5;
-    t.vertex = '5';
-    test.push_back(t);
-
-    // sig t;
-    t.cost = 3;
-    t.time = 9;
-    t.vertex = '4';
-    test.push_back(t);
-
-    t.cost = 10;
-    t.time = 3;
-    t.vertex = '5';
-    test.push_back(t);
-
-    // sig t;
-    t.cost = 10;
-    t.time = 3;
-    t.vertex = '1';
-    test.push_back(t);
-
-    // sig t;
-    t.cost = 9;
-    t.time = 3;
-    t.vertex = '5';
-    test.push_back(t);
-
-    // sig t;
-    t.cost = 7;
-    t.time = 9;
-    t.vertex = '6';
-    test.push_back(t);
-
-    // sig t;
-    t.cost = 10;
-    t.time = 6;
-    t.vertex = '6';
-    test.push_back(t);
-
-    // sig t;
-    t.cost = 15;
-    t.time = 4;
-    t.vertex = '2';
-    test.push_back(t);
-
-    // sig t;
-    t.cost = 13;
-    t.time = 4;
-    t.vertex = '6';
-    test.push_back(t);
-
-    // sig t;
-    t.cost = 12;
-    t.time = 4;
-    t.vertex = '3';
-    test.push_back(t);
-
-    // sig t;
-    t.cost = 13;
-    t.time = 5;
-    t.vertex = '2';
-    test.push_back(t);
-
-
-    priority_queue<Signature, vector<Signature>, CPath<CostT,TimeT,VertexT>> pq;
-
-    for (auto el : test)
-    {
-
-        pq.push(el);
-
-        cout << "( " << el.cost << "," << el.time << " ) : " << el.vertex << "\n";
-    }
-
-    while (!pq.empty())
-    {
-        auto tlol = pq.top();
-
-        pq.pop();
-
-        cout << "Current val:\t(" << tlol.cost << "," << tlol.time << ") : " << tlol.vertex << endl;
-    }
-}
-
-template<typename CostT, typename TimeT, typename VertexT>
-void CPath<CostT, TimeT, VertexT>::checkP() {
-    for(auto& V: this->P){
-        // forVertex
-        cout << V.first << " : ";
-        for(auto &V2 : V.second){
-            // Vertex , Cost , Time
-            cout << "( " <<  V2.pred  <<"," << V2.cost << "," << V2.time << ")";
-        }
-        cout << endl;
-    }
-}
-
-//template<typename CostT, typename TimeT, typename VertexT>
-//void CPath<CostT, TimeT, VertexT>::feasiblePath() {
-//
-//    // TODO: CHECK FOR FOR COST AND TIME BASED ON THE ORIGINAL EDGE (SUBSTRACTION)
-//
-//
-//    auto pathsForV = P.find("6");
-//    vector<Signature> t = pathsForV->second;
-//    VertexT currV = "6";
-//    cout << currV << " ";
-//
-//    while( currV != "0" ){
-//        currV = t.back().pred;
-//        cout << currV << " ";
-//        pathsForV = P.find(currV);
-//        t = pathsForV->second;
-//    }
-//}
-
-
+/**
+ *
+ * Grabbing our destination tail from the P[dest].
+ * This is giving us the most optimal path in terms of
+ * most expensive and least time.
+ *
+ * From then on we are storing the predecessors for each of the signatures
+ * and we are utilizing that to walk back P[] in order to get the full path.
+ *
+ * Also, we are considering the cost and time from the original edges and substracting
+ * from the current, thus, comparing to the predesessor to find which of the P[predecessors]
+ * entries is the correct one.
+ *
+ * If we don't reach our destination and some of the vertecies do not exist as we walk back
+ * then the path is not found.
+ *
+ * @tparam CostT
+ * @tparam TimeT
+ * @tparam VertexT
+ * @param start
+ * @param dest
+ */
 template <typename CostT, typename TimeT, typename VertexT>
 void CPath<CostT, TimeT, VertexT>::feasiblePath(VertexT start, VertexT dest) {
 
-    // TODO: CHECK FOR FOR COST AND TIME BASED ON THE ORIGINAL EDGE (SUBSTRACTION)
+    cout << "COST-FEASIBLE AND FASTEST PAIR(COST, TIME): " << endl;
+    cout << "------------------------------------------" << endl;
+    stack<VertexT> path;
 
     auto pathsForV = P.find(dest);
+    if(pathsForV == P.end()){
+        cout << "PATH NOT FEASIBLE! " << endl;
+        return;
+    }
     vector<Signature> t = pathsForV->second;
     VertexT currV = dest;
     Signature sig = t.back();
     CostT currCost = sig.cost;
     TimeT currTime = sig.time;
 
+    cout << "(" << currCost << " , " << currTime << ")" << endl;
+
     CostT orgCost;
     TimeT orgTime;
     VertexT pred;
-    cout << currV << " ";
+    path.push(currV);
 
     while (currV != start ) {
         pred = sig.pred;
@@ -346,8 +255,12 @@ void CPath<CostT, TimeT, VertexT>::feasiblePath(VertexT start, VertexT dest) {
             if (b != i->second.end()) {
                 orgCost = b->second.first;
                 orgTime = b->second.second;
-            }else{ return; };
-        }else{ return; }
+            }else{
+                cout << "\nPATH NOT FEASIBLE!" << endl;
+                return; };
+        }else{
+            cout << "\nPATH NOT FEASIBLE! " << endl;
+            return; }
 
         pathsForV = P.find(pred);
         t = pathsForV->second;
@@ -357,9 +270,16 @@ void CPath<CostT, TimeT, VertexT>::feasiblePath(VertexT start, VertexT dest) {
                 currCost = n.cost;
                 currTime = n.time;
                 currV = n.vertex;
-                cout << currV << " ";
+                path.push(currV);
             }
         }
+    }
+    cout << "\nACTUAL PATH: " << endl;
+    cout << "------------------------" << endl;
+    while (!path.empty())
+    {
+        cout << path.top() << " ";
+        path.pop();
     }
 }
 

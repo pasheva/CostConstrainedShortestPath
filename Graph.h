@@ -461,7 +461,6 @@ class graph {
             for(edge &e : vertices[u].outgoing)
                 ans[vertices[u].name][id2name(e.vertex_id)] = make_pair(e.weight, e.weight2);
         }
-
         return ans;
     }
 
