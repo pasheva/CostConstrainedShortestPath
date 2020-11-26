@@ -325,10 +325,9 @@ void CPath<CostT, TimeT, VertexT>::feasiblePath(VertexT start, VertexT dest) {
 
     // TODO: CHECK FOR FOR COST AND TIME BASED ON THE ORIGINAL EDGE (SUBSTRACTION)
 
-    // auto pathsForV = P.find("6");
     auto pathsForV = P.find(dest);
     vector<Signature> t = pathsForV->second;
-    VertexT currV = "6";
+    VertexT currV = dest;
     Signature sig = t.back();
     CostT currCost = sig.cost;
     TimeT currTime = sig.time;
@@ -338,7 +337,6 @@ void CPath<CostT, TimeT, VertexT>::feasiblePath(VertexT start, VertexT dest) {
     VertexT pred;
     cout << currV << " ";
 
-    // while (currV != start){
     while (currV != start ) {
         pred = sig.pred;
 
@@ -348,8 +346,8 @@ void CPath<CostT, TimeT, VertexT>::feasiblePath(VertexT start, VertexT dest) {
             if (b != i->second.end()) {
                 orgCost = b->second.first;
                 orgTime = b->second.second;
-            }
-        }
+            }else{ return; };
+        }else{ return; }
 
         pathsForV = P.find(pred);
         t = pathsForV->second;

@@ -10,13 +10,12 @@ int main(int argc, char *argv[]){
 
     graph g;
     g.read_file(argv[1]); // Reading file
-    double budget = 10;
+    double budget = 100;
     CPath<double,double,string> myPath(g,budget);
 
     cout << "\nF*** THAT SHIT ASS NEIGHBOURS:\n\n";
     myPath.findPaths("0");
     cout << endl;
-    myPath.check();
     return 0;
 }
 
